@@ -22,13 +22,17 @@ rsync -a \
   --exclude 'README.md' \
   "$SRC/" "$OUT/"
 
-# 改写根绝对路径，避免部署到项目站后链接指到 zypcode.github.io 根目录
+# 改写站内绝对路径（保留协议相对 URL：//cdn...）
 while IFS= read -r -d '' f; do
   sed -i \
+    -e 's|href="//|href="__HEXO_PROTO__|g' \
+    -e 's|src="//|src="__HEXO_PROTO__|g' \
     -e "s|href=\"/|href=\"${BASE}/|g" \
     -e "s|src=\"/|src=\"${BASE}/|g" \
     -e "s|content=\"/|content=\"${BASE}/|g" \
     -e "s|url(/|url(${BASE}/|g" \
+    -e 's|href="__HEXO_PROTO__|href="//|g' \
+    -e 's|src="__HEXO_PROTO__|src="//|g' \
     "$f"
 done < <(find "$OUT" -type f \( -name '*.html' -o -name '*.css' \) -print0)
 
