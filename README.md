@@ -8,11 +8,11 @@
 
 ## 本地预览
 
-需要 Node.js 16 或 18（Hexo 3.8 与更高版本 Node 兼容性较差，推荐 16）。
+需要 Node.js 18 或 20（当前 Hexo 7.3）。
 
 ```bash
 npm ci
-npx hexo server
+npm run server
 ```
 
 浏览器打开终端提示的地址（默认 http://localhost:4000/yu-peng-stack/）。
@@ -28,6 +28,8 @@ git push
 ```
 
 ## 写文章
+
+`package.json` 需保留 `"hexo": { "version": "..." }` 字段，否则 `hexo-cli` 无法识别本站目录。
 
 ```bash
 npx hexo new "标题"

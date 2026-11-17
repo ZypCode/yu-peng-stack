@@ -15,31 +15,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Install & generate
+        env:
+          LANG: C.UTF-8
+          LC_ALL: C.UTF-8
+        run: |
+          npm ci
+          npm run build
+          wc -c public/index.html public/css/style.css
+          test "$(wc -c < public/index.html)" -gt 1000
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-
-      # 旧 master 分支是纯静态站；改写路径后作为临时发布源（Hexo 3.8 在 CI 上生成空文件，待修复后再切回 npx hexo generate）
-      - uses: actions/checkout@v4
-        with:
-          repository: ZypCode/ZypCode.github.io
-          ref: master
-          path: legacy-site
-
-      - name: Rewrite paths for project site
-        run: |
-          chmod +x scripts/prepare-legacy-static.sh
-          ./scripts/prepare-legacy-static.sh legacy-site out
-          find out -name 'index.html' -exec wc -c {} \; | head -5
-
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: out
-
       - id: deployment
         uses: actions/deploy-pages@v4
